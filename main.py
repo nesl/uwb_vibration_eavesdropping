@@ -3,9 +3,12 @@ import numpy as np
 from read_frame_data import read_uwb_data
 
 # read the audio-UWB dataset
-filepath = "/home/ziqi/Desktop/collected_data_191109"
-uwb_audio_dataset = read_uwb_data(filepath)
-
+try:
+    uwb_audio_dataset = np.load("uwb_audio_dataset.npy")
+except FileNotFoundError:
+    filepath = "/home/ziqi/Desktop/collected_data_191109"
+    uwb_audio_dataset = read_uwb_data(filepath)
+    np.save("uwb_audio_dataset.npy", uwb_audio_dataset)
 # The next step is to perform data collection
 
 # The next step is find the "range of interest", i.e. locate the speaker
