@@ -84,7 +84,8 @@ def read_breath_data(filepath):
 
 
 if __name__ == "__main__":
-	breath_data = read_breath_data("/home/ziqi/Desktop/collected_data_191109")
+	#breath_data = read_breath_data("/home/ziqi/Desktop/collected_data_191109")
+	breath_data = read_breath_data("../collected_data/collected_data_191109")
 	try:
 		uwb_audio_dataset = np.load("uwb_breath_dataset.npy")
 	except FileNotFoundError:

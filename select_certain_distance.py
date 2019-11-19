@@ -70,7 +70,7 @@ if __name__ == "__main__":
     # plt.plot(np.arange(1/1000.0, (len(bb_data_slow_time)+1)/1000.0, step=1/1000.0), bb_data_slow_time_phase)
     # plt.show()
 
-    dataset = np.load("uwb_breath_dataset.npy")
+    dataset = np.load("uwb_breath_dataset.npy", allow_pickle=True)
     dataset = dataset.item()
 
     phase_variance_over_distances = []
