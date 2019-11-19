@@ -12,7 +12,7 @@ def read_uwb_data(filepath):
 
 			audio_frequency = int(file_info[0]) + 0.01 * int(file_info[1])
 
-			fp = open("sample_data.txt", "r+")
+			fp = open(filepath + "/" + filename, "r+")
 			text_content = fp.readlines()
 			fp.close()
 
@@ -48,7 +48,7 @@ def read_breath_data(filepath):
 			testee = file_info[1]
 			# distance = file_info[2]
 
-			fp = open("sample_data.txt", "r+")
+			fp = open(filepath + "/" + filename, "r+")
 			text_content = fp.readlines()
 			fp.close()
 
@@ -85,4 +85,8 @@ def read_breath_data(filepath):
 
 if __name__ == "__main__":
 	breath_data = read_breath_data("/home/ziqi/Desktop/collected_data_191109")
+	try:
+		uwb_audio_dataset = np.load("uwb_breath_dataset.npy")
+	except FileNotFoundError:
+		np.save("uwb_breath_dataset.npy", breath_data)
 	print("NESL is awesome.")
