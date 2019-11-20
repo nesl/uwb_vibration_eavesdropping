@@ -2,6 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from read_frame_data import read_uwb_data
 
+sampling_rate = 23.328e9
+bb_sampling_rate = sampling_rate/8.0
+light_speed = 299792458
+rf_interval = light_speed/23.328e9/2
+bb_interval = rf_interval * 8
+slow_time_sampling_rate = 1000.0
+
 # read the audio-UWB dataset
 try:
     uwb_audio_dataset = np.load("uwb_audio_dataset.npy")
