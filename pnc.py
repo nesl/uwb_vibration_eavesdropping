@@ -45,7 +45,8 @@ class PhaseCorrection(object):
 		direct coupled energy in the beginning of the frame is often preferred.
 		"""
 		self.bin_ref = bin_ref
-		self.bin_angle = np.angle(bbframes.mean())
+		self.bin_angle = np.angle(np.array(bbframes).mean())
+		print(self.bin_angle)
 		#self.bin_angle = np.angle(bbframes[:,bin_ref]).mean()
 		#self.bin_angle = np.angle([x[bin_ref] for x in bbframes]).mean()
 
@@ -67,14 +68,14 @@ bb_data_slow_time = select_certain_distance_bin(dataset, freq=220.00, bin_num=20
 bb_data_slow_time_target = select_certain_distance_bin(dataset, freq=220.00, bin_num=16)
 
 # calculate the phase for this particular bin
-pnc = PhaseCorrection(bb_data_slow_time_target, 16)
+pnc = PhaseCorrection(bb_data_slow_time, 16)
 # Apply the filter to other pieces of data
-new_bb_slow_time = pnc.filter(bb_data_slow_time)
+new_bb_slow_time = pnc.filter(bb_data_slow_time_target)
 # print(bb_data_slow_time[:20])
 # print(new_bb_slow_time[:20])
 
 plt.figure()
-plt.plot(bb_data_slow_time)
+plt.plot(bb_data_slow_time_target)
 plt.figure()
 plt.plot(new_bb_slow_time)
 plt.show()
