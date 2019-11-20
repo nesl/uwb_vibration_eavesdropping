@@ -31,7 +31,7 @@ def getAverageRefBin(data_frames, frame_indexes):
 
 
 class PhaseCorrection(object):
-	def __init__(self, bbframes, bin_ref):
+	def __init__(self, bbframes_ref, bin_ref):
 		"""Takes a baseband frame buffer and stores mean phase of the given bin.
 		The phase at the reference bin is later used as a reference when
 		phase correcting the frame:
@@ -45,7 +45,8 @@ class PhaseCorrection(object):
 		direct coupled energy in the beginning of the frame is often preferred.
 		"""
 		self.bin_ref = bin_ref
-		self.bin_angle = np.angle(bbframes.mean())
+		self.bin_angle = np.angle(np.array(bbframes_ref).mean())
+		print(self.bin_angle)
 		#self.bin_angle = np.angle(bbframes[:,bin_ref]).mean()
 		#self.bin_angle = np.angle([x[bin_ref] for x in bbframes]).mean()
 
@@ -67,14 +68,12 @@ bb_data_slow_time = select_certain_distance_bin(dataset, freq=220.00, bin_num=20
 bb_data_slow_time_target = select_certain_distance_bin(dataset, freq=220.00, bin_num=16)
 
 # calculate the phase for this particular bin
-pnc = PhaseCorrection(bb_data_slow_time_target, 16)
+pnc = PhaseCorrection(bb_data_slow_time, 20)
 # Apply the filter to other pieces of data
-new_bb_slow_time = pnc.filter(bb_data_slow_time)
-# print(bb_data_slow_time[:20])
-# print(new_bb_slow_time[:20])
+new_bb_slow_time = pnc.filter(bb_data_slow_time_target)
 
 plt.figure()
-plt.plot(bb_data_slow_time)
+plt.plot(bb_data_slow_time_target)
 plt.figure()
 plt.plot(new_bb_slow_time)
 plt.show()
