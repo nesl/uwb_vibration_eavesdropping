@@ -4,6 +4,7 @@ import re
 import scipy.fftpack
 from select_certain_distance import select_certain_distance_bin
 
+
 # 15 for the reference bin
 
 
@@ -27,8 +28,6 @@ def getAverageRefBin(data_frames, frame_indexes):
 
 	return avg_bin
 
-#
-
 
 class PhaseCorrection(object):
 	def __init__(self, bbframes_ref, bin_ref):
@@ -45,9 +44,11 @@ class PhaseCorrection(object):
 		direct coupled energy in the beginning of the frame is often preferred.
 		"""
 		self.bin_ref = bin_ref
-		self.bin_angle = np.angle(np.array(bbframes_ref).mean())
+		self.bin_angle = np.angle(bbframes_ref[:,bin_ref]).mean()
+
+
 		print(self.bin_angle)
-		#self.bin_angle = np.angle(bbframes[:,bin_ref]).mean()
+
 		#self.bin_angle = np.angle([x[bin_ref] for x in bbframes]).mean()
 
 	def filter(self, frame):
@@ -62,18 +63,27 @@ class PhaseCorrection(object):
 
 dataset = np.load("uwb_audio_dataset.npy", allow_pickle=True)
 dataset = dataset.item()
+bb_frames = np.array(dataset[220.00][0])
+#
+# frame_9_amp = [abs(each) for each in (dataset[220.00][0][9])]
+# plt.figure()
+# plt.plot(frame_9_amp)
+# plt.show()
 
-# Get the distance bin for 15 (apparently the reference bin)
-bb_data_slow_time = select_certain_distance_bin(dataset, freq=220.00, bin_num=20)
-bb_data_slow_time_target = select_certain_distance_bin(dataset, freq=220.00, bin_num=16)
+# Get the reference bin and the target bin
+# reference_bin = select_certain_distance_bin(dataset, freq=220.00, bin_num=0)
+# target_bin = select_certain_distance_bin(dataset, freq=220.00, bin_num=24)
 
 # calculate the phase for this particular bin
-pnc = PhaseCorrection(bb_data_slow_time, 20)
+pnc = PhaseCorrection(bb_frames, 0)
 # Apply the filter to other pieces of data
-new_bb_slow_time = pnc.filter(bb_data_slow_time_target)
 
 plt.figure()
-plt.plot(bb_data_slow_time_target)
+plt.plot(np.angle(bb_frames[:, 24])[0:1000])
+
+for i in range(0, len(bb_frames)):
+	bb_frames[i,:] = pnc.filter(bb_frames[i,:])
+
 plt.figure()
-plt.plot(new_bb_slow_time)
+plt.plot(np.angle(bb_frames[:, 24])[0:1000])
 plt.show()
