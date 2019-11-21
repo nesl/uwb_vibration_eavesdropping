@@ -1,12 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.fft import fft
 import re
 import scipy.fftpack
-from select_certain_distance import select_certain_distance_bin
-
-
-# 15 for the reference bin
-
 
 # Map the normalized amplitude to visualize and get a reference bin
 def getHighestReferenceAmp(frame_vals):
@@ -45,9 +41,7 @@ class PhaseCorrection(object):
 		"""
 		self.bin_ref = bin_ref
 		self.bin_angle = np.angle(bbframes_ref[:,bin_ref]).mean()
-
-
-		print(self.bin_angle)
+		# print(self.bin_angle)
 
 		#self.bin_angle = np.angle([x[bin_ref] for x in bbframes]).mean()
 
@@ -57,33 +51,51 @@ class PhaseCorrection(object):
 		#print(frame_complex)
 		frame_complex = np.asarray([x[0] + 1j*x[1] for x in frame_complex])
 		phase_correction = self.bin_angle - np.angle(frame_complex[self.bin_ref])
-		print(phase_correction)
+		# print(phase_correction)
 		return frame_complex * np.exp(1j*phase_correction)
 
 
-dataset = np.load("uwb_audio_dataset.npy", allow_pickle=True)
-dataset = dataset.item()
-bb_frames = np.array(dataset[220.00][0])
-#
-# frame_9_amp = [abs(each) for each in (dataset[220.00][0][9])]
-# plt.figure()
-# plt.plot(frame_9_amp)
-# plt.show()
+if __name__ == "__main__":
 
-# Get the reference bin and the target bin
-# reference_bin = select_certain_distance_bin(dataset, freq=220.00, bin_num=0)
-# target_bin = select_certain_distance_bin(dataset, freq=220.00, bin_num=24)
+	dataset = np.load("uwb_audio_dataset.npy", allow_pickle=True)
+	dataset = dataset.item()
+	bb_frames = np.array(dataset[440.00][1])
+	print(np.shape(bb_frames))
+	#
+	# frame_9_amp = [abs(each) for each in (dataset[220.00][0][9])]
+	# plt.figure()
+	# plt.plot(frame_9_amp)
+	# plt.show()
 
-# calculate the phase for this particular bin
-pnc = PhaseCorrection(bb_frames, 0)
-# Apply the filter to other pieces of data
+	# Get the reference bin and the target bin
+	# reference_bin = select_certain_distance_bin(dataset, freq=220.00, bin_num=0)
+	# target_bin = select_certain_distance_bin(dataset, freq=220.00, bin_num=24)
 
-plt.figure()
-plt.plot(np.angle(bb_frames[:, 24])[0:1000])
+	# calculate the phase for this particular bin
+	pnc = PhaseCorrection(bb_frames, 0)
+	# Apply the filter to other pieces of data
 
-for i in range(0, len(bb_frames)):
-	bb_frames[i,:] = pnc.filter(bb_frames[i,:])
+	# plt.figure()
+	# plt.plot(np.angle(bb_frames[:, 24])[0:1000])
 
-plt.figure()
-plt.plot(np.angle(bb_frames[:, 24])[0:1000])
-plt.show()
+	for i in range(0, len(bb_frames)):
+		bb_frames[i, :] = pnc.filter(bb_frames[i, :])
+	plt.figure()
+	plt.plot((np.angle(bb_frames[:, 13]))[10:-10])
+	plt.figure()
+	plt.plot((np.angle(bb_frames[:, 14]))[10:-10])
+	plt.figure()
+	plt.plot((np.angle(bb_frames[:, 15]))[10:-10])
+	plt.figure()
+	plt.plot(abs(fft(np.angle(bb_frames[:, 13])))[10:-10])
+	plt.figure()
+	plt.plot(abs(fft(np.angle(bb_frames[:, 14])))[10:-10])
+	plt.figure()
+	plt.plot(abs(fft(np.angle(bb_frames[:, 15])))[10:-10])
+
+	fft_result = fft(bb_frames[:, 35][0:5000])
+	plt.figure()
+	plt.plot(abs(fft_result)[10:-10])
+	plt.show()
+	# plt.plot(np.angle(bb_frames[:, 24])[0:1000])
+	# plt.show()

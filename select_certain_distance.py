@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from pnc import PhaseCorrection
 
 sampling_rate = 23.328e9
 bb_sampling_rate = sampling_rate/8.0
@@ -11,22 +12,22 @@ slow_time_sampling_rate = 1000.0
 
 
 def select_certain_distance_bin(uwb_audio_dataset:dict, freq=440.00, bin_num=16):
-    select_fast_slow_time = uwb_audio_dataset[freq][1]
+    bb_frames = uwb_audio_dataset[freq][1]
     # dist = 0.75
     # bin_to_load = np.round((dist - rf_interval*4) / bb_interval) + 1
     bb_data_slow_time_at_selected_bin = []
-    for i in range(0, len(select_fast_slow_time)):
-        bb_data_slow_time_at_selected_bin.append(select_fast_slow_time[i][bin_num])
+    for i in range(0, len(bb_frames)):
+        bb_data_slow_time_at_selected_bin.append(bb_frames[i][bin_num])
     return bb_data_slow_time_at_selected_bin
 
 
 def select_certain_distance_bin_breath(uwb_breath_dataset:dict, testee="a", bin_num=22):
-    select_fast_slow_time = uwb_breath_dataset[testee]
+    bb_frames = uwb_breath_dataset[testee]
     # dist = 0.75
     # bin_to_load = np.round((dist - rf_interval*4) / bb_interval) + 1
     bb_data_slow_time_at_selected_bin = []
-    for i in range(0, len(select_fast_slow_time)):
-        bb_data_slow_time_at_selected_bin.append(select_fast_slow_time[i][bin_num])
+    for i in range(0, len(bb_frames)):
+        bb_data_slow_time_at_selected_bin.append(bb_frames[i][bin_num])
     return bb_data_slow_time_at_selected_bin
 
 
@@ -34,42 +35,41 @@ if __name__ == "__main__":
 
     # dataset = np.load("uwb_audio_dataset.npy", allow_pickle=True)
     # dataset = dataset.item()
-    # select_fast_slow_time = dataset[349.23][1]
-
+    # bb_frames = np.array(dataset[349.23][1])
+    #
     dataset = np.load("uwb_breath_dataset.npy", allow_pickle=True)
     dataset = dataset.item()
-    select_fast_slow_time = dataset['a']
+    bb_frames = np.array(dataset['c'])
+
+    pnc = PhaseCorrection(bb_frames, 0)
+    for i in range(0, len(bb_frames)):
+        bb_frames[i, :] = pnc.filter(bb_frames[i, :])
 
     phase_all_data = []
-    for i in range(0, len(select_fast_slow_time)):
+    for i in range(0, len(bb_frames)):
         phase_all_data.append([])
-        for j in range(0, len(select_fast_slow_time[i])):
-            phase_all_data[-1].append(np.angle(select_fast_slow_time[i][j]))
-    mean_across_slow_time = []
+        for j in range(0, len(bb_frames[i])):
+            phase_all_data[-1].append(np.angle(bb_frames[i, j]))
 
-    for i in range(0, len(phase_all_data[0])):
-        temp = []
-        for j in range(0, len(phase_all_data)):
-            temp.append(phase_all_data[j][i])  # extract column i
-        mean_across_slow_time.append(np.mean(temp))
+    mean_across_slow_time = np.mean(np.array(phase_all_data), axis=0)
 
     for i in range(0, len(phase_all_data)):
         for j in range(0, len(phase_all_data[i])):
             phase_all_data[i][j] = phase_all_data[i][j] - mean_across_slow_time[j]
 
-    phase_in_the_14th_bin = []
+    phase_in_the_15th_bin = []
     for i in range(0, 3000):
-        phase_in_the_14th_bin.append(phase_all_data[i][14])
+        phase_in_the_15th_bin.append(phase_all_data[i][14])
 
-    phase_in_the_24th_bin = []
+    phase_in_the_25th_bin = []
     for i in range(0, 18000):
-        phase_in_the_24th_bin.append(phase_all_data[i][24])
+        phase_in_the_25th_bin.append(phase_all_data[i][21])
 
     plt.figure()
     # plt.pcolormesh(phase_all_data[0:200][:])
     plt.pcolormesh(phase_all_data)
     plt.figure()
-    plt.plot(phase_in_the_24th_bin)
+    plt.plot(phase_in_the_25th_bin)
     plt.show()
 
 
