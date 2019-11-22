@@ -33,13 +33,13 @@ def select_certain_distance_bin_breath(uwb_breath_dataset:dict, testee="a", bin_
 
 if __name__ == "__main__":
 
-    # dataset = np.load("uwb_audio_dataset.npy", allow_pickle=True)
-    # dataset = dataset.item()
-    # bb_frames = np.array(dataset[349.23][1])
-    #
-    dataset = np.load("uwb_breath_dataset.npy", allow_pickle=True)
+    dataset = np.load("uwb_audio_dataset.npy", allow_pickle=True)
     dataset = dataset.item()
-    bb_frames = np.array(dataset['c'])
+    bb_frames = np.array(dataset[349.23][1])
+    #
+    # dataset = np.load("uwb_breath_dataset.npy", allow_pickle=True)
+    # dataset = dataset.item()
+    # bb_frames = np.array(dataset['c'])
 
     pnc = PhaseCorrection(bb_frames, 0)
     for i in range(0, len(bb_frames)):
@@ -63,13 +63,19 @@ if __name__ == "__main__":
 
     phase_in_the_25th_bin = []
     for i in range(0, 18000):
-        phase_in_the_25th_bin.append(phase_all_data[i][21])
+        phase_in_the_25th_bin.append(phase_all_data[i][23])
 
     plt.figure()
     # plt.pcolormesh(phase_all_data[0:200][:])
     plt.pcolormesh(phase_all_data)
+    plt.xlabel("Distance Bins")
+    plt.ylabel("Time")
+    plt.title("Phase change over time and distance")
     plt.figure()
-    plt.plot(phase_in_the_25th_bin)
+    plt.plot(phase_in_the_15th_bin)
+    plt.xlabel("Time")
+    plt.ylabel("Phase/Rad")
+    plt.title("Phase change over time at 75 cm distance")
     plt.show()
 
 
