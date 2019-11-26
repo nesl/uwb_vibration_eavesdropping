@@ -3,3 +3,4 @@
 __pycache__
 uwb_breath_dataset.npy
 uwb_audio_dataset.npy
+breathing/videos/*
