@@ -16,8 +16,8 @@ function [data_frames] = read_file_into_matrix(filepath)
             data_points = str2double(data_points);
             data_bins = [];
             for idx = 1:2:length(data_points)
-                complex_val = complex(data_points(idx), data_points(idx+1)) %real + imag
-                data_bins = [data_bins, complex_val]
+                complex_val = complex(data_points(idx), data_points(idx+1)); %real + imag
+                data_bins = [data_bins, complex_val];
             end
             % Append data bins to data frame
             data_frames = [data_frames; data_bins];

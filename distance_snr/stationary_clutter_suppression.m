@@ -1,8 +1,7 @@
-function y = stationary_clutter_suppression(x)
-    % This one is designed for removing DC components only
-    % y = loop_filter(x, clutter_coef);
+function y = stationary_clutter_suppression(x, clutter_coef)
+    % This one is designed for sound to remove DC components
+    y = loop_filter(x, clutter_coef);
     % Low Frequency removing
-    y = x;
     for i = 1: size(y,2)
         temp = y(:,i);
         Hd = notch_60_bw_4;

@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     dataset = np.load("uwb_audio_dataset.npy", allow_pickle=True)
     dataset = dataset.item()
-    data = select_certain_distance_bin(dataset, freq=110.00, bin_num=26)
+    data = select_certain_distance_bin(dataset, freq=110.00, bin_num=33)
     # data = data[0:6000]
     data = np.abs(data[0:6000])
     data = (data - min(data)) / (max(data) - min(data))
@@ -23,6 +23,7 @@ if __name__ == "__main__":
     plt.figure()
     plt.plot(data)
     f, t, Zxx = signal.stft(data, slow_time_sampling_rate, window="hamming", nperseg=200)
+    import pdb; pdb.set_trace();
     plt.figure()
     plt.pcolormesh(t, f[10:], np.abs(Zxx)[10:, :])
     plt.title('STFT Magnitude')

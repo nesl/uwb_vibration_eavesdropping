@@ -1,6 +1,6 @@
-.idea
-.idea/*
-__pycache__
-uwb_breath_dataset.npy
-uwb_audio_dataset.npy
-breathing/videos/*
+python/.idea
+python/.idea/*
+python/__pycache__
+python/uwb_breath_dataset.npy
+python/uwb_audio_dataset.npy
+breathing_demo/videos/*

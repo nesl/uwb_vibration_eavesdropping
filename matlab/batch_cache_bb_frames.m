@@ -1,4 +1,4 @@
-rootpath = "/home/ziqi/Desktop/collected_data_20191124/";
+rootpath = "/home/ziqi/Desktop/collected_data_20191204/";
 filelist = dir(rootpath);
 for i = 3:length(filelist)
     filepath = rootpath + filelist(i).name;
