@@ -2,7 +2,9 @@
 % bb_frames = read_file_into_matrix(filepath);
 % or
 % load("/home/ziqi/Desktop/cached_data_20191124/mary_0.mat");
-load("/home/ziqi/Desktop/cached_data_20191204/human_voice_3K_4.mat")
+% load("/home/ziqi/Desktop/cached_data_20191204/human_voice_3K_4.mat")
+
+bb_frames = phase_noise_correction(bb_frames, 1);
 
 bb_frames = stationary_clutter_suppression(bb_frames);
 
