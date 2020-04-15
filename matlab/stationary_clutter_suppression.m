@@ -1,6 +1,6 @@
 function y = stationary_clutter_suppression(x)
-    % This one is designed for removing DC components only
-    % y = loop_filter(x, clutter_coef);
+    % Pre-emphasis
+%     y = preemphasis(x, 0.98);
     % Low Frequency removing
     y = x;
     for i = 1: size(y,2)
