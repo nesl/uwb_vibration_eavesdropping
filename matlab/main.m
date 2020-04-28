@@ -1,14 +1,14 @@
-% filepath = "/home/ziqi/Desktop/collected_data_20200414/location_200_150_b_01.txt";
-% filepath = "/home/ziqi/Desktop/collected_data_200407/beta_mary_1.txt";
-filepath = "/home/ziqi/Desktop/collected_data_20200415/test_0cm_125cm.txt";
+filepath = "/home/ziqi/Desktop/collected_data_20200414/location_200_150_b_01.txt";
+% filepath = "/home/ziqi/Desktop/collected_data_20200415/dishwasher_50cm_03.txt";
+% filepath = "/home/ziqi/Desktop/uwb_sound_data/collected_data_20191124/220_00_0.txt";
 bb_frames = read_file_into_matrix(filepath);
 % or
 % load("/home/ziqi/Desktop/cached_data_20191124/mary_0.mat");
 % load("/home/ziqi/Desktop/cached_data_20191204/human_voice_3K_4.mat")
 
-bb_frames = reorganize_bb_frames(bb_frames);
+% bb_frames = reorganize_bb_frames(bb_frames);
 
-bb_frames = phase_noise_correction(bb_frames, 1);
+bb_frames = phase_noise_correction(bb_frames, 20);
 
 bb_frames = stationary_clutter_suppression(bb_frames);
 

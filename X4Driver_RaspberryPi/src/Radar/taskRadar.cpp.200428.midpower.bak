@@ -393,18 +393,6 @@ int taskRadar(void)
     {
         printf("x4driver_check_configuration unknow situcation\n");
     }
-#endif 
-    
-        status = x4driver_set_tx_power(x4driver, TX_POWER_HIGH);
-#ifdef DEBUG
-    if (status == XEP_ERROR_X4DRIVER_OK)
-    {
-        printf("x4driver_set_tx_power success\n");
-    }
-    else
-    {
-        printf("x4driver_set_tx_power unknow situcation\n");
-    }
 #endif // DEBUG
 
     /***************set fps, this will trigger data output***************/
