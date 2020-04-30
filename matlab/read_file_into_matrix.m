@@ -13,8 +13,12 @@ function [data_frames] = read_file_into_matrix(filepath)
             data_points = data_points(3:length(data_points)-2);
             data_points = str2double(data_points);
             data_bins = [];
-            for idx = 1:2:length(data_points)
-                complex_val = complex(data_points(idx), data_points(idx+1)); %real + imag
+            if mod(length(data_points),2)
+                disp("Missing I/Q");
+                return;
+            end
+            for idx = 1:length(data_points)/2
+                complex_val = complex(data_points(idx), data_points(idx+length(data_points)/2)); %real + imag
                 data_bins = [data_bins, complex_val];
             end
             % Append data bins to data frame

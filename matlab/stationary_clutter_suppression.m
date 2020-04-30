@@ -7,7 +7,7 @@ function y = stationary_clutter_suppression(x)
         temp = y(:,i);
         Hd = notch_60_bw_4;
         temp = Hd(temp);
-        Hd = hpf_20;
+        Hd = hpf_20_100;
         temp = Hd(temp);
         y(:,i) = temp;
     end
