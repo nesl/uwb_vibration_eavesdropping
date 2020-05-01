@@ -1,4 +1,4 @@
-filepath = "/home/ziqi/Desktop/collected_data_20200430/wall_261_63_140_f_redo_lights_off.txt";
+filepath = "/home/ziqi/Desktop/collected_data_20200430/reflection_test.txt";
 bb_frames = read_file_into_matrix(filepath);
 % or
 % load("/home/ziqi/Desktop/cached_data_20191124/mary_0.mat");

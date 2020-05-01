@@ -7,7 +7,7 @@ function [data_frame_after_pnc] = phase_noise_correction(data_frame, ref_bin)
     % Note:
     for i = 1:size(data_frame, 1)
         temp = data_frame(i,:);
-        phase_difference = referece_phase - phase(temp(1));
+        phase_difference = referece_phase - phase(temp(ref_bin));
         temp = temp .* exp(1j * phase_difference);
         data_frame_after_pnc(i,:) = temp;
     end
