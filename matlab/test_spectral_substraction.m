@@ -1,18 +1,19 @@
-filepath = "/home/ziqi/Desktop/noise.txt";
-bb_frames_noise = read_file_into_matrix(filepath);
-filepath = "/home/ziqi/Desktop/sound.txt";
-bb_frames_sound = read_file_into_matrix(filepath);
-bb_frames = [bb_frames_noise(end-1*1000:end,:); bb_frames_sound];
+% filepath = "/home/ziqi/Desktop/noise.txt";
+% bb_frames_noise = read_file_into_matrix(filepath);
+% filepath = "/home/ziqi/Desktop/sound.txt";
+% bb_frames_sound = read_file_into_matrix(filepath);
+% bb_frames = [bb_frames_noise(end-1*1000:end,:); bb_frames_sound];
 
-bb_frames = phase_noise_correction(bb_frames, 20);
+bb_frames = phase_noise_correction(bb_frames, 1);
 
 bb_frames = stationary_clutter_suppression(bb_frames);
 
+bb_frames = [real(bb_frames), imag(bb_frames)];
 [object_inx, target_bin] = vibrating_target_localization(bb_frames);
 
 candidate_data = bb_frames(:,target_bin);
 
-output_sound = abs(candidate_data(100:end));
+output_sound = candidate_data;
 
 % fft analysis
 Fs = 1000;            % Sampling frequency                    
@@ -32,15 +33,14 @@ xlabel('f (Hz)')
 ylabel('|P1(f)|')
 
 % stft analysis
-figure()
-stft(candidate_data,Fs,'Window',hamming(256, "periodic"),'OverlapLength',192,'FFTLength',256);
+
 figure()
 stft(output_sound,Fs,'Window',hamming(256, "periodic"),'OverlapLength',192,'FFTLength',256);
 
-denoised_output = SSBoll79(output_sound,Fs,0.6);
+denoised_output = SSBoll79(output_sound,Fs,1);
 figure()
 stft(denoised_output,Fs,'Window',hamming(256, "periodic"),'OverlapLength',192,'FFTLength',256);
 
-denoised_output = SSBerouti79(output_sound,Fs,0.6);
+denoised_output = SSBerouti79(output_sound,Fs,1);
 figure()
 stft(denoised_output,Fs,'Window',hamming(256, "periodic"),'OverlapLength',192,'FFTLength',256);

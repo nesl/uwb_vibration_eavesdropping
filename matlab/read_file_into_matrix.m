@@ -1,4 +1,3 @@
-
 function [data_frames] = read_file_into_matrix(filepath)
 % Takes as input a filename, outputs a matrix of values
     fid = fopen(filepath);
