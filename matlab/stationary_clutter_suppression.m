@@ -1,11 +1,17 @@
 function y = stationary_clutter_suppression(x)
-    % Pre-emphasis
-%     y = preemphasis(x, 0.98);
-    % Low Frequency removing
+%     % Pre-emphasis
+%     use_pre_emp = 1;
+%     if use_pre_emp
+%         y = preemphasis(x, 0.9);
+%     else
+%         y = x;
+%     end
     y = x;
+    % Low Frequency removing
+%     
     for i = 1: size(y,2)
         temp = y(:,i);
-        [Hd, b] = hpf_20_100; % high pass FIR, stop at 20 pass at 100
+        [Hd, b] = hpf_20_70; % high pass FIR, stop at 20 pass at 100
         temp = filtfilt(b,1,temp);
         
         % comb filting solving interference caused by power (60Hz) and its

@@ -12,9 +12,10 @@ function [data_frames] = read_file_into_matrix(filepath)
             data_points = data_points(3:length(data_points)-2);
             data_points = str2double(data_points);
             data_bins = [];
-            if mod(length(data_points),2)
+            if mod(length(data_points),2) %|| length(data_points)~=160
                 disp("Missing I/Q");
-                return;
+                tline = fgetl(fid);
+                continue;
             end
             for idx = 1:length(data_points)/2
                 complex_val = complex(data_points(idx), data_points(idx+length(data_points)/2)); %real + imag

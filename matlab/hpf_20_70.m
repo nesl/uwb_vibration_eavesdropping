@@ -1,4 +1,4 @@
-function [Hd, b] = hpf_20_100
+function [Hd, b] = hpf_20_70
 %HPF_20_100 Returns a discrete-time filter object.
 
 % MATLAB Code
@@ -11,7 +11,7 @@ function [Hd, b] = hpf_20_100
 Fs = 1000;  % Sampling Frequency
 
 Fstop = 20;              % Stopband Frequency
-Fpass = 100;             % Passband Frequency
+Fpass = 70;             % Passband Frequency
 Dstop = 0.0001;          % Stopband Attenuation
 Dpass = 0.057501127785;  % Passband Ripple
 dens  = 20;              % Density Factor
