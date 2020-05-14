@@ -1,4 +1,4 @@
-filepath = "/home/ziqi/Desktop/uwb_sound_data/collected_data_20200509/p312_011_1500_75.txt";
+filepath = "/home/ziqi/Desktop/uwb_sound_data/collected_data_20200509/400_75_1500_tune2.txt";
 
 bb_frames = read_file_into_matrix(filepath);
 % or
@@ -53,10 +53,11 @@ output_sound = self_centralize(output_sound, 1);
 soundsc(output_sound, Fs)
 
 % Spectral Substraction need the first 0.5s contain only noise
-denoised_output = SSBoll79(output_sound,Fs,0.5);
+denoised_output = self_centralize(SSBoll79(output_sound,Fs,0.5),1);
 figure()
 stft(denoised_output,Fs,'Window',hamming(256, "periodic"),'OverlapLength',192,'FFTLength',256);
 % soundsc(denoised_output, Fs)
+% audiowrite("recovered_human_reading_numbers_denoised.wav",denoised_output,Fs)
 % 
 % denoised_output = SSBerouti79(output_sound,Fs,0.5);
 % figure()
