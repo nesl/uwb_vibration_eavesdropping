@@ -1,6 +1,6 @@
-filepath = "/home/ziqi/Desktop/uwb_sound_data/collected_data_20200509/400_75_1500_tune2.txt";
-
-bb_frames = read_file_into_matrix(filepath);
+% filepath = "/home/ziqi/Desktop/uwb_sound_data/collected_data_20200509/400_75_1500_tune2.txt";
+% 
+% bb_frames = read_file_into_matrix(filepath);
 % or
 % load("/home/ziqi/Desktop/cached_data_20191124/mary_0.mat");
 
@@ -9,13 +9,15 @@ bb_frames = phase_noise_correction(bb_frames, 1);
 bb_frames = stationary_clutter_suppression(bb_frames);
 % Warning: if Fs changed , filters need to be adjusted
 
+
 bb_frames = [real(bb_frames), imag(bb_frames)];
 [object_inx, target_bin] = vibrating_target_localization(bb_frames);
 
 candidate_data = bb_frames(:,target_bin);
 
 % fft analysis
-Fs = 1500;            % Sampling frequency 
+%Fs = 1500;            % Sampling frequency 
+Fs = 1000;
 T = 1/Fs;             % Sampling period
 L = size(bb_frames, 1); % Length of signal
 t = (0:L-1).*T;        % Time vector
@@ -56,6 +58,11 @@ soundsc(output_sound, Fs)
 denoised_output = self_centralize(SSBoll79(output_sound,Fs,0.5),1);
 figure()
 stft(denoised_output,Fs,'Window',hamming(256, "periodic"),'OverlapLength',192,'FFTLength',256);
+
+bw_target = 5;
+signal_power_c4 = inband_power(denoised_output, Fs, 261.63, bw_target)
+signal_power_a3 = inband_power(denoised_output, Fs, 220.00, bw_target)
+
 % soundsc(denoised_output, Fs)
 % audiowrite("recovered_human_reading_numbers_denoised.wav",denoised_output,Fs)
 % 

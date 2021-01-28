@@ -31,7 +31,7 @@ def create_note(time1, freq):
 	t = np.linspace(0, seconds, int(seconds * fs), False)
 
 	# Generate a 440 Hz sine wave
-	note = np.sin(frequency * t * 2 * np.pi)
+	note =  np.sin(frequency * t * 2 * np.pi)
 
 	# Ensure that highest value is in 16-bit range
 	audio = note * (2**15 - 1) / np.max(np.abs(note))
@@ -47,17 +47,17 @@ def create_note(time1, freq):
 	return audio
 
 
-# sound = []
-# sound = np.asarray(sound)
-# sound = np.append(sound, np.zeros(44100))
-# sound = np.append(sound, create_note(6, 900))
-# save_wav.write('900Hz.wav', 44100, sound)
-
 sound = []
 sound = np.asarray(sound)
 sound = np.append(sound, np.zeros(44100))
-sound = np.append(sound, create_note(10, C4))
+sound = np.append(sound, create_note(12, 261.63))
 save_wav.write('C4.wav', 44100, sound)
+
+# sound = []
+# sound = np.asarray(sound)
+# sound = np.append(sound, np.zeros(44100))
+# sound = np.append(sound, create_note(10, C4))
+# save_wav.write('C4.wav', 44100, sound)
 
 # # # The following sound is "Mary has a little lamb"
 # #

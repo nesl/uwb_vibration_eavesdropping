@@ -8,7 +8,7 @@ function [Hd, b] = hpf_20_70
 % Equiripple Highpass filter designed using the FIRPM function.
 
 % All frequency values are in Hz.
-Fs = 1000;  % Sampling Frequency
+Fs = 1500;  % Sampling Frequency
 
 Fstop = 20;              % Stopband Frequency
 Fpass = 70;             % Passband Frequency

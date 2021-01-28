@@ -1,5 +1,8 @@
-addpath("~/Desktop/uwb_sound_data/collected_data_20200511/");
-listing = dir("~/Desktop/uwb_sound_data/collected_data_20200511");
+% filepath = "~/Desktop/uwb_sound_data/collected_data_20200511/";
+% filepath = "~/Desktop/uwb_sound_data/temp";
+filepath = "~/hdd/code-archive/UWB-Sound-Extraction-Project/uwb_sound_data/temp";
+addpath(filepath);
+listing = dir(filepath);
 for i = 3:length(listing)
     filename = listing(i).name;
     new_name = erase(filename, ".txt");

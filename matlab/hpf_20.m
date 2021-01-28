@@ -1,4 +1,4 @@
-function Hd = hpf_20
+function [Hd, b] = hpf_20
 %HPF_20 Returns a discrete-time filter object.
 
 % MATLAB Code

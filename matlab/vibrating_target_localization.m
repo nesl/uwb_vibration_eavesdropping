@@ -31,7 +31,7 @@ function [object_inx, y] = vibrating_target_localization(iqmat)
     end
     
     [~,object_inx] = findpeaks(concentration_out,'SortStr','descend');
-    object_inx(object_inx==41 | object_inx==1)=[];
+%     object_inx(object_inx==81 | object_inx==1)=[];
     if length(object_inx) < 1
         fprintf('[no object]');
         return;

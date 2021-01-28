@@ -1,169 +1,259 @@
 close all; clear all; clc
-distance_range = 50:50:300;
+cache_path = "~/hdd/code-archive/UWB-Sound-Extraction-Project/uwb_sound_data/collected_data_20200919/distance";
+% cache_path = "~/hdd/code-archive/UWB-Sound-Extraction-Project/uwb_sound_data/collected_data_20200528/wall";
+% cache_path = "~/hdd/code-archive/UWB-Sound-Extraction-Project/uwb_sound_data/collected_data_20200528/distance";
+
+addpath(cache_path);
+listing = dir(cache_path);
+
+place_distances = [];
 SNR_array_paper = [];
 bin_array_paper = [];
-SNR_array_short_time_real = [];
-SNR_array_short_time_imag = [];
-for range = 1:length(distance_range)
-    dist = distance_range(range);
-    filename = num2str(dist) + ".mat";
+SNR_array_short_time = [];
+
+for i = 3:length(listing)
+    filename = listing(i).name;
+    placement_distance = split(filename,["_" "."]);
+%     placement_distance = str2double(placement_distance{4});
+    placement_distance = str2double(placement_distance{1});
+%     placement_distance = split(filename,["_"]);
+%     placement_distance = str2double(placement_distance{3});
     load(filename);
     bb_frames = phase_noise_correction(bb_frames, 1);
     bb_frames = stationary_clutter_suppression(bb_frames);
-    Fs = 1000;            % Sampling frequency                    
-    T = 1/Fs;             % Sampling period       
-    L = size(bb_frames, 1); % Length of signal
-    t = (0:L-1)*T;        % Time vector
-    f = Fs*(0:(round(L/2)))/L;
+    bb_frames = [real(bb_frames), imag(bb_frames)];
+    
+    
+    [object_inx, target_bin] = vibrating_target_localization(bb_frames);
+    range_min = 0.32326;
+    if target_bin > 177
+        distance = range_min + 0.0514*(target_bin-178);
+    else
+        distance = range_min + 0.0514*(target_bin-1);
+    end
+    fprintf("%d\n",distance)
+
+%     [object_inx, target_bin] = vibrating_target_localization(bb_frames);
+%     range_min = 0.32326;
+%     if target_bin > 80
+%         distance = range_min + 0.0514*(target_bin-81);
+%     else
+%         distance = range_min + 0.0514*(target_bin-1);
+%     end
+%     fprintf("%d\n",distance)
+    
+%     Fs = 1500;            % Sampling frequency  
+    Fs = 1000;
+    f_target = 261.63;
+%     bw_target = 5;
+    bw_target = 2.5;
     
     SNR_temp = [];
     for j = 1:size(bb_frames, 2)
         data = bb_frames(:,j);
-        Y = fft(data);
-        P2 = abs(Y);
-        P1 = P2(1:round(L/2)+1);
-        P1(2:end-1) = 2*P1(2:end-1);
-
-        f_target = 261.63;
-        bw_target = 2;
-        f_index = find(abs(f - f_target)< bw_target);
-
-        signal_power = sum(abs(P1(f_index)).^2);
-        noise_power = sum(abs(P1).^2) - signal_power;
-        SNR = 10*log10(signal_power/noise_power);
+        SNR = self_snr(data, Fs,f_target, bw_target);
         SNR_temp = [SNR_temp SNR];
     end
+    
     max_SNR = max(SNR_temp);
     max_bin = find(SNR_temp == max_SNR);
     
-    data = real(bb_frames(:,max_bin));
-    num_frames = floor(length(data)/1000);
+    data = real(bb_frames(2500:end,max_bin)); % The beginning is noise sample
+    window_len = 1*1500;
+    overlap_len = 0.5*window_len;
+    num_frames = floor(length(data)/overlap_len)-1;
     short_time_snr = -realmax * ones(1, num_frames);
     for frame_cnt = 1:num_frames
-        short_time_frame = data((frame_cnt-1)*1000+1:frame_cnt*1000);
-        short_time_snr(frame_cnt) = snr(short_time_frame);
+        short_time_frame = data((frame_cnt-1)*overlap_len+1:(frame_cnt-1)*overlap_len+window_len);
+        short_time_snr(frame_cnt) = self_snr(short_time_frame, Fs,f_target, bw_target);
     end
-    SNR_array_short_time_real = [SNR_array_short_time_real; short_time_snr];
-    
-    data = imag(bb_frames(:,max_bin));
-    num_frames = floor(length(data)/1000);
-    short_time_snr = -realmax * ones(1, num_frames);
-    for frame_cnt = 1:num_frames
-        short_time_frame = data((frame_cnt-1)*1000+1:frame_cnt*1000);
-        short_time_snr(frame_cnt) = snr(short_time_frame);
-    end
-    SNR_array_short_time_imag = [SNR_array_short_time_imag; short_time_snr];
+    SNR_array_short_time = [SNR_array_short_time; short_time_snr];
     
     SNR_array_paper = [SNR_array_paper max_SNR];
     bin_array_paper = [bin_array_paper max_bin];
-    fprintf("%d", range);
+    
+    place_distances = [place_distances;placement_distance];
+%     fprintf("%d\n", placement_distance);
 end
 
-figure()
-hold on
-plot(1:6, mean(SNR_array_short_time_real,2), "-.", "linewidth", 2)
-plot(1:6, mean(SNR_array_short_time_imag,2), "-.", "linewidth", 2)
-legend("Using Real", "Using Imag")
-boxplot(SNR_array_short_time_real')
-boxplot(SNR_array_short_time_imag')
-ylabel("SNR/dB")
-xlabel("Speaker Distance/cm")
-xticklabels(50:50:300)
-title("SNR vs Speaker Distance in Free Space")
-
-snr_array_max = max(SNR_array_short_time_real', SNR_array_short_time_imag');
-figure()
-hold on
-plot(1:6, mean(snr_array_max), "-.", "linewidth", 2)
-boxplot(snr_array_max)
-ylabel("SNR/dB")
-xlabel("Speaker Distance/cm")
-xticklabels(50:50:300)
-title("SNR vs Speaker Distance in Free Space")
-
-
-clear;
-distance_range = 80:30:170;
-SNR_array_paper = [];
-bin_array_paper = [];
-SNR_array_short_time_real = [];
-SNR_array_short_time_imag = [];
-for range = 1:length(distance_range)
-    dist = distance_range(range);
-    filename = num2str(dist) + ".mat";
-    load(filename);
-    bb_frames = phase_noise_correction(bb_frames, 1);
-    bb_frames = stationary_clutter_suppression(bb_frames);
-    Fs = 1000;            % Sampling frequency                    
-    T = 1/Fs;             % Sampling period       
-    L = size(bb_frames, 1); % Length of signal
-    t = (0:L-1)*T;        % Time vector
-    f = Fs*(0:(round(L/2)))/L;
-    
-    SNR_temp = [];
-    for j = 1:size(bb_frames, 2)
-        data = bb_frames(:,j);
-        Y = fft(data);
-        P2 = abs(Y);
-        P1 = P2(1:round(L/2)+1);
-        P1(2:end-1) = 2*P1(2:end-1);
-
-        f_target = 261.63;
-        bw_target = 2;
-        f_index = find(abs(f - f_target)< bw_target);
-
-        signal_power = sum(abs(P1(f_index)).^2);
-        noise_power = sum(abs(P1).^2) - signal_power;
-        SNR = 10*log10(signal_power/noise_power);
-        SNR_temp = [SNR_temp SNR];
-    end
-    max_SNR = max(SNR_temp);
-    max_bin = find(SNR_temp == max_SNR);
-    
-    data = real(bb_frames(:,max_bin));
-    num_frames = floor(length(data)/1000);
-    short_time_snr = -realmax * ones(1, num_frames);
-    for frame_cnt = 1:num_frames
-        short_time_frame = data((frame_cnt-1)*1000+1:frame_cnt*1000);
-        short_time_snr(frame_cnt) = snr(short_time_frame);
-    end
-    SNR_array_short_time_real = [SNR_array_short_time_real; short_time_snr];
-    
-    data = imag(bb_frames(:,max_bin));
-    num_frames = floor(length(data)/1000);
-    short_time_snr = -realmax * ones(1, num_frames);
-    for frame_cnt = 1:num_frames
-        short_time_frame = data((frame_cnt-1)*1000+1:frame_cnt*1000);
-        short_time_snr(frame_cnt) = snr(short_time_frame);
-    end
-    SNR_array_short_time_imag = [SNR_array_short_time_imag; short_time_snr];
-    
-    SNR_array_paper = [SNR_array_paper max_SNR];
-    bin_array_paper = [bin_array_paper max_bin];
-    fprintf("%d", range);
-end
 
 figure()
 hold on
-plot(1:4, mean(SNR_array_short_time_real,2), "-.", "linewidth", 2)
-plot(1:4, mean(SNR_array_short_time_imag,2), "-.", "linewidth", 2)
-legend("Using Real", "Using Imag")
-boxplot(SNR_array_short_time_real')
-boxplot(SNR_array_short_time_imag')
+plot(1:length(place_distances), mean(SNR_array_short_time,2), "-.", "linewidth",4)
+boxplot(SNR_array_short_time')
 ylabel("SNR/dB")
-xlabel("Speaker Distance/cm")
-xticklabels(80:30:170)
-title("SNR vs Speaker Distance Through Wall")
+xlabel("Speaker Placement Distance/cm")
+xticklabels(place_distances)
+% title("SNR vs Speaker Placement Distance")
+title("SNR vs Speaker Through-wall Distance")
 
-snr_array_max = max(SNR_array_short_time_real', SNR_array_short_time_imag');
-figure()
-hold on
-plot(1:4, mean(snr_array_max), "-.", "linewidth", 2)
-boxplot(snr_array_max)
-ylabel("SNR/dB")
-xlabel("Speaker Distance/cm")
-xticklabels(80:30:170)
-title("SNR vs Speaker Distance Through Wall")
+
+% close all; clear all; clc
+% distance_range = 50:50:300;
+% SNR_array_paper = [];
+% bin_array_paper = [];
+% SNR_array_short_time_real = [];
+% SNR_array_short_time_imag = [];
+% for range = 1:length(distance_range)
+%     dist = distance_range(range);
+%     filename = num2str(dist) + ".mat";
+%     load(filename);
+%     bb_frames = phase_noise_correction(bb_frames, 1);
+%     bb_frames = stationary_clutter_suppression(bb_frames);
+%     Fs = 1000;            % Sampling frequency                    
+%     T = 1/Fs;             % Sampling period       
+%     L = size(bb_frames, 1); % Length of signal
+%     t = (0:L-1)*T;        % Time vector
+%     f = Fs*(0:(round(L/2)))/L;
+%     
+%     SNR_temp = [];
+%     for j = 1:size(bb_frames, 2)
+%         data = bb_frames(:,j);
+%         Y = fft(data);
+%         P2 = abs(Y);
+%         P1 = P2(1:round(L/2)+1);
+%         P1(2:end-1) = 2*P1(2:end-1);
+% 
+%         f_target = 261.63;
+%         bw_target = 2;
+%         f_index = find(abs(f - f_target)< bw_target);
+% 
+%         signal_power = sum(abs(P1(f_index)).^2);
+%         noise_power = sum(abs(P1).^2) - signal_power;
+%         SNR = 10*log10(signal_power/noise_power);
+%         SNR_temp = [SNR_temp SNR];
+%     end
+%     max_SNR = max(SNR_temp);
+%     max_bin = find(SNR_temp == max_SNR);
+%     
+%     data = real(bb_frames(:,max_bin));
+%     num_frames = floor(length(data)/1000);
+%     short_time_snr = -realmax * ones(1, num_frames);
+%     for frame_cnt = 1:num_frames
+%         short_time_frame = data((frame_cnt-1)*1000+1:frame_cnt*1000);
+%         short_time_snr(frame_cnt) = snr(short_time_frame);
+%     end
+%     SNR_array_short_time_real = [SNR_array_short_time_real; short_time_snr];
+%     
+%     data = imag(bb_frames(:,max_bin));
+%     num_frames = floor(length(data)/1000);
+%     short_time_snr = -realmax * ones(1, num_frames);
+%     for frame_cnt = 1:num_frames
+%         short_time_frame = data((frame_cnt-1)*1000+1:frame_cnt*1000);
+%         short_time_snr(frame_cnt) = snr(short_time_frame);
+%     end
+%     SNR_array_short_time_imag = [SNR_array_short_time_imag; short_time_snr];
+%     
+%     SNR_array_paper = [SNR_array_paper max_SNR];
+%     bin_array_paper = [bin_array_paper max_bin];
+%     fprintf("%d", range);
+% end
+% 
+% figure()
+% hold on
+% plot(1:6, mean(SNR_array_short_time_real,2), "-.", "linewidth", 2)
+% plot(1:6, mean(SNR_array_short_time_imag,2), "-.", "linewidth", 2)
+% legend("Using Real", "Using Imag")
+% boxplot(SNR_array_short_time_real')
+% boxplot(SNR_array_short_time_imag')
+% ylabel("SNR/dB")
+% xlabel("Speaker Distance/cm")
+% xticklabels(50:50:300)
+% title("SNR vs Speaker Distance in Free Space")
+% 
+% snr_array_max = max(SNR_array_short_time_real', SNR_array_short_time_imag');
+% figure()
+% hold on
+% plot(1:6, mean(snr_array_max), "-.", "linewidth", 2)
+% boxplot(snr_array_max)
+% ylabel("SNR/dB")
+% xlabel("Speaker Distance/cm")
+% xticklabels(50:50:300)
+% title("SNR vs Speaker Distance in Free Space")
+
+% 
+% clear;
+% distance_range = 80:30:170;
+% SNR_array_paper = [];
+% bin_array_paper = [];
+% SNR_array_short_time_real = [];
+% SNR_array_short_time_imag = [];
+% for range = 1:length(distance_range)
+%     dist = distance_range(range);
+%     filename = num2str(dist) + ".mat";
+%     load(filename);
+%     bb_frames = phase_noise_correction(bb_frames, 1);
+%     bb_frames = stationary_clutter_suppression(bb_frames);
+%     Fs = 1000;            % Sampling frequency                    
+%     T = 1/Fs;             % Sampling period       
+%     L = size(bb_frames, 1); % Length of signal
+%     t = (0:L-1)*T;        % Time vector
+%     f = Fs*(0:(round(L/2)))/L;
+%     
+%     SNR_temp = [];
+%     for j = 1:size(bb_frames, 2)
+%         data = bb_frames(:,j);
+%         Y = fft(data);
+%         P2 = abs(Y);
+%         P1 = P2(1:round(L/2)+1);
+%         P1(2:end-1) = 2*P1(2:end-1);
+% 
+%         f_target = 261.63;
+%         bw_target = 2;
+%         f_index = find(abs(f - f_target)< bw_target);
+% 
+%         signal_power = sum(abs(P1(f_index)).^2);
+%         noise_power = sum(abs(P1).^2) - signal_power;
+%         SNR = 10*log10(signal_power/noise_power);
+%         SNR_temp = [SNR_temp SNR];
+%     end
+%     max_SNR = max(SNR_temp);
+%     max_bin = find(SNR_temp == max_SNR);
+%     
+%     data = real(bb_frames(:,max_bin));
+%     num_frames = floor(length(data)/1000);
+%     short_time_snr = -realmax * ones(1, num_frames);
+%     for frame_cnt = 1:num_frames
+%         short_time_frame = data((frame_cnt-1)*1000+1:frame_cnt*1000);
+%         short_time_snr(frame_cnt) = snr(short_time_frame);
+%     end
+%     SNR_array_short_time_real = [SNR_array_short_time_real; short_time_snr];
+%     
+%     data = imag(bb_frames(:,max_bin));
+%     num_frames = floor(length(data)/1000);
+%     short_time_snr = -realmax * ones(1, num_frames);
+%     for frame_cnt = 1:num_frames
+%         short_time_frame = data((frame_cnt-1)*1000+1:frame_cnt*1000);
+%         short_time_snr(frame_cnt) = snr(short_time_frame);
+%     end
+%     SNR_array_short_time_imag = [SNR_array_short_time_imag; short_time_snr];
+%     
+%     SNR_array_paper = [SNR_array_paper max_SNR];
+%     bin_array_paper = [bin_array_paper max_bin];
+%     fprintf("%d", range);
+% end
+% 
+% figure()
+% hold on
+% plot(1:4, mean(SNR_array_short_time_real,2), "-.", "linewidth", 2)
+% plot(1:4, mean(SNR_array_short_time_imag,2), "-.", "linewidth", 2)
+% legend("Using Real", "Using Imag")
+% boxplot(SNR_array_short_time_real')
+% boxplot(SNR_array_short_time_imag')
+% ylabel("SNR/dB")
+% xlabel("Speaker Distance/cm")
+% xticklabels(80:30:170)
+% title("SNR vs Speaker Distance Through Wall")
+% 
+% snr_array_max = max(SNR_array_short_time_real', SNR_array_short_time_imag');
+% figure()
+% hold on
+% plot(1:4, mean(snr_array_max), "-.", "linewidth", 2)
+% boxplot(snr_array_max)
+% ylabel("SNR/dB")
+% xlabel("Speaker Distance/cm")
+% xticklabels(80:30:170)
+% title("SNR vs Speaker Distance Through Wall")
 
 % distance_range = 30:10:140;
 % diaphragm_type = "f";

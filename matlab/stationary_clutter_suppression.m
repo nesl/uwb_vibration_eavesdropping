@@ -11,6 +11,7 @@ function y = stationary_clutter_suppression(x)
 %     
     for i = 1: size(y,2)
         temp = y(:,i);
+%         [Hd, b] = hpf_20; 
         [Hd, b] = hpf_20_70; % high pass FIR, stop at 20 pass at 100
         temp = filtfilt(b,1,temp);
         

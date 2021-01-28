@@ -26,7 +26,7 @@ function plot_values_over_time(data, bin)
 %     % Just for demo
 %     current_values = current_values(1:10000);
 %     dim1 = 10000;
-
+%     plot(current_values)
     current_values = smooth(current_values, 64);
 %     i = 0;
 %     while((i+1)*2000<length(current_values))
@@ -39,12 +39,21 @@ function plot_values_over_time(data, bin)
 %         end
 %         i = i+1;
 %     end
-
+    
     current_values = (current_values - min(current_values))/(max(current_values) - min(current_values));
+    
+    % Remove very slow trends
+    ecgnl = current_values;
+    t = 1:length(current_values);
+    opol = 6;
+    [p,~,mu] = polyfit(t,ecgnl,opol);
+    f_y = polyval(p,t,[],mu);
+    current_values = ecgnl - f_y';
+    
     figure()
-    plot(abs(current_values))
-    
-    
+    plot(t./1000, current_values, "linewidth", 5)
+    xlabel("Time/s")
+    ylabel("Normalized Frequency")
     fig = figure("Position",[10 10 1200 600]);
     ax1 = subplot(1,3,[1 2]);
 %     h = animatedline('MaximumNumPoints', 10000); % animate the line
